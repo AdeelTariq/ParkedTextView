@@ -22,9 +22,6 @@
             android:textSize="24sp"
             app:parkedText="Once upon a time   ."
             app:parkedHint="write your story here"
-            app:parkedTextColor="FFFFFF"
-            app:parkedHintColor="CCCCCC"
-            app:parkedTextBold="true"
             android:gravity="center"/>
 
 </RelativeLayout>

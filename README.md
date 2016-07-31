@@ -47,7 +47,7 @@ allprojects {
 ```java
 
 dependencies {
-    compile 'com.github.AdeelTariq:ParkedTextView:2.0.1'
+    compile 'com.github.AdeelTariq:ParkedTextView:2.0.2'
 }
 ```
 
