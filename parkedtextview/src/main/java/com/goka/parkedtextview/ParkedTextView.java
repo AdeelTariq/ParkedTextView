@@ -117,7 +117,11 @@ public class ParkedTextView extends EditText {
             textChanged(mTotalText);
         } else {
             mParkedText = parkedText;
+            mTotalText = parkedText;
+            setText (mTotalText);
+            goToEndOfText ();
         }
+
     }
 
     private String getTypedText() {
