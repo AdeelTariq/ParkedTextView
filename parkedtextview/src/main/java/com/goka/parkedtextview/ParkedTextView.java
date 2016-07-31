@@ -77,7 +77,7 @@ public class ParkedTextView extends EditText {
     public void setParkedText(String parkedText) {
 
         if (!TextUtils.isEmpty(mTotalText)) {
-            String typed = mTotalText.substring(parkedText.length ());
+            String typed = mTotalText.substring(mParkedText.length ());
             mTotalText = parkedText + typed;
             mParkedText = parkedText;
 
@@ -104,17 +104,6 @@ public class ParkedTextView extends EditText {
 
     private void setTypedText(String typedText) {
         textChanged(typedText);
-    }
-
-    private String reformatColor(String color) {
-        if (color.startsWith("#")) {
-            color = color.substring(1);
-        }
-
-        if (color.length() > 6) {
-            return color.substring(2);
-        }
-        return color;
     }
 
     private String getJoinedText () {
