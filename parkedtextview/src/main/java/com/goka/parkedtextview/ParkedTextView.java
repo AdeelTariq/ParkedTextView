@@ -114,18 +114,11 @@ public class ParkedTextView extends EditText {
     }
 
     private void setTypedText(String typedText) {
-//        mTotalText = typedText;
-//        observeText();
-
         textChanged(typedText);
     }
 
-    private void setEmptyText() {
-        setTypedText("");
-    }
-
     public void setPlaceholderText(String placeholderText) {
-        Spanned hint = null;
+        Spanned hint;
         String parkedTextColor = reformatColor(mParkedTextColor);
         String parkedHintColor = reformatColor(mParkedHintColor);
         if (mIsBoldParkedText) {
@@ -200,7 +193,6 @@ public class ParkedTextView extends EditText {
     private static class ParkedTextViewWatcher implements TextWatcher {
 
         private ParkedTextView mParkedTextView;
-        private boolean mIsDeleteText;
 
         public ParkedTextViewWatcher(ParkedTextView parkedTextView) {
             this.mParkedTextView = parkedTextView;
@@ -213,11 +205,6 @@ public class ParkedTextView extends EditText {
         @Override
         public void onTextChanged(CharSequence s, int start, int before, int count) {
 
-            if (before > 0) {
-                mIsDeleteText = true;
-            } else {
-                mIsDeleteText = false;
-            }
         }
 
         @Override
