@@ -106,6 +106,11 @@ public class ParkedTextView extends EditText {
         textChanged(typedText);
     }
 
+    public void emptyTypedText () {
+        mTotalText = mParkedText + "";
+        setText (getJoinedText ());
+    }
+
     private String getJoinedText () {
 
         return String.format("%s", mParkedText + getTypedText());
