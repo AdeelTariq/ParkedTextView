@@ -52,10 +52,6 @@ dependencies {
 ```
 
 
-## Release
-1.0.0
- First release.
-
 
 ## Reference
 [ParkedTextField for iOS](https://github.com/gmertk/ParkedTextField)
