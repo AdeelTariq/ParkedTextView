@@ -1,7 +1,13 @@
 # ParkedTextView
-A EditText with a constant text in the end.
+An EditText with a constant text in the start.
 
-![](https://github.com/gotokatsuya/ParkedTextView/blob/master/doc/demo-gif.gif)
+<!--![](https://github.com/gotokatsuya/ParkedTextView/blob/master/doc/demo-gif.gif)-->
+
+
+## Differences from main repo
+
+  1. Parked text is at the start of the rest of the text
+  2. Typing is smoother. You can long press backspace to delete paragraph of text.
 
 
 ## How to use
@@ -27,15 +33,21 @@ A EditText with a constant text in the end.
 
 ## Gradle
 
-Coming soon.
 
 ```java
-repositories {
-    jcenter()
+allprojects {
+    repositories {
+        ...
+        maven { url "https://jitpack.io" }
+    }
 }
 
+```
+
+```java
+
 dependencies {
-    compile 'com.github.goka.parkedtextview:parkedtextview:1.0.0'
+    compile 'compile 'com.github.AdeelTariq:ParkedTextView:2.0.0'
 }
 ```
 
