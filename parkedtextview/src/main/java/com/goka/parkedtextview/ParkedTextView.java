@@ -8,6 +8,7 @@ import android.text.Spanned;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.widget.EditText;
 
 /**
@@ -25,11 +26,7 @@ public class ParkedTextView extends EditText {
     private String mParkedHintColor = DEFAULT_TEXT_COLOR;
 
     // Unable to set
-    private String mText = null;
-    private enum TypingState {
-        Start, Typed
-    }
-    private TypingState mTypingState = TypingState.Start;
+    private String mTotalText = null;
 
     public ParkedTextView(Context context) {
         super(context);
@@ -74,10 +71,9 @@ public class ParkedTextView extends EditText {
     }
 
     private void init() {
-        mText = "";
+        mTotalText = "";
         observeText();
 
-        mTypingState = TypingState.Start;
         addTextChangedListener(new ParkedTextViewWatcher(this));
     }
 
@@ -86,19 +82,20 @@ public class ParkedTextView extends EditText {
     }
 
     public void setParkedText(String parkedText) {
-        if (!TextUtils.isEmpty(mText)) {
-            String typed = mText.substring(0, getBeginningPositionOfParkedText());
-            mText = typed + parkedText;
+        if (!TextUtils.isEmpty(mTotalText)) {
+            String typed = mTotalText.substring(0, getBeginningPositionOfParkedText());
+            mTotalText = typed + parkedText;
             mParkedText = parkedText;
 
-            textChanged();
+            textChanged(mTotalText);
         } else {
             mParkedText = parkedText;
         }
     }
 
     private int getBeginningPositionOfParkedText() {
-        int position = mText.length() - mParkedText.length();
+        int position = mTotalText.length() - mParkedText.length();
+        Log.w (TAG, "text = " + mTotalText + " parked = " + mParkedText);
         if (position < 0) {
             return 0;
         }
@@ -110,17 +107,17 @@ public class ParkedTextView extends EditText {
     }
 
     private String getTypedText() {
-        if (mText.endsWith(mParkedText)) {
-            return mText.substring(0, getBeginningPositionOfParkedText());
+        if ( mTotalText.endsWith(mParkedText)) {
+            return mTotalText.substring(0, getBeginningPositionOfParkedText());
         }
-        return mText;
+        return mTotalText;
     }
 
     private void setTypedText(String typedText) {
-        mText = typedText;
-        observeText();
+//        mTotalText = typedText;
+//        observeText();
 
-        textChanged();
+        textChanged(typedText);
     }
 
     private void setEmptyText() {
@@ -141,7 +138,7 @@ public class ParkedTextView extends EditText {
 
     // Call when TypedText is changed
     private String observeText() {
-        return mText = getTypedText() + mParkedText;
+        return mTotalText = getTypedText() + mParkedText;
     }
 
     private String reformatColor(String color) {
@@ -157,37 +154,22 @@ public class ParkedTextView extends EditText {
 
     private Spanned getHtmlText() {
         String parkedTextColor = reformatColor(mParkedTextColor);
+        Log.w (TAG, "parked text = " + mParkedText + " typed = " + getTypedText ());
         if (mIsBoldParkedText) {
             return Html.fromHtml(String.format("<font color=\"#%s\">%s</font><font color=\"#%s\"><b>%s</b></font>", parkedTextColor, getTypedText(), parkedTextColor, mParkedText));
         }
         return Html.fromHtml(String.format("<font color=\"#%s\">%s</font>", parkedTextColor, getTypedText() + mParkedText));
     }
 
-    private void textChanged() {
-        switch (mTypingState) {
-            case Start:
-                if (mText.length() <= 0) {
-                    return;
-                }
-                setText(getHtmlText(), BufferType.SPANNABLE);
-                goToBeginningOfParkedText();
-
-                mTypingState = TypingState.Typed;
-
-            case Typed:
-                if (mText.equals(mParkedText)) {
-                    mTypingState = TypingState.Start;
-                    setText(getHtmlText(), BufferType.SPANNABLE);
-                    return;
-                }
-
-                setText(getHtmlText(), BufferType.SPANNABLE);
-
-                goToBeginningOfParkedText();
-
-            default:
-                break;
+    private void textChanged (String typedText) {
+        if (!typedText.endsWith (mParkedText)) {
+            mTotalText = getTypedText () + mParkedText;
+            setText (getHtmlText ());
+        } else {
+            mTotalText = typedText;
+            setText (getHtmlText ());
         }
+        goToBeginningOfParkedText();
     }
 
     public boolean isBoldParkedText() {
@@ -214,6 +196,7 @@ public class ParkedTextView extends EditText {
         mParkedHintColor = parkedHintColor;
     }
 
+
     private static class ParkedTextViewWatcher implements TextWatcher {
 
         private ParkedTextView mParkedTextView;
@@ -224,10 +207,12 @@ public class ParkedTextView extends EditText {
         }
 
         @Override
-        public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+        }
 
         @Override
         public void onTextChanged(CharSequence s, int start, int before, int count) {
+
             if (before > 0) {
                 mIsDeleteText = true;
             } else {
@@ -240,21 +225,8 @@ public class ParkedTextView extends EditText {
             mParkedTextView.removeTextChangedListener(this);
 
             String text = s.toString();
-            if (mIsDeleteText) {
 
-                if (text.length() < mParkedTextView.getParkedText().length()) {
-                    mParkedTextView.setEmptyText();
-                } else {
-                    String parkedText = text.substring(mParkedTextView.getBeginningPositionOfParkedText() - 1);
-                    if (!parkedText.equals(mParkedTextView.getParkedText())) {
-                        mParkedTextView.setEmptyText();
-                    } else {
-                        mParkedTextView.setTypedText(text);
-                    }
-                }
-            } else {
-                mParkedTextView.setTypedText(text);
-            }
+            mParkedTextView.setTypedText(text);
 
             mParkedTextView.addTextChangedListener(this);
         }
