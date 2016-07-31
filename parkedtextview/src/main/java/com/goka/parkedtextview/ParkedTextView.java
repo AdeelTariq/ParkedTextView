@@ -46,6 +46,7 @@ public class ParkedTextView extends EditText {
         if (mParkedText == null) {
             mParkedText = "";
         }
+        setParkedText (mParkedText);
 
         String hint = a.getString(R.styleable.ParkedTextView_parkedHint);
 
@@ -77,14 +78,40 @@ public class ParkedTextView extends EditText {
         addTextChangedListener(new ParkedTextViewWatcher(this));
     }
 
+    //  set the hint
+    public void setPlaceholderText(String placeholderText) {
+        Spanned hint;
+        String parkedTextColor = reformatColor(mParkedTextColor);
+        String parkedHintColor = reformatColor(mParkedHintColor);
+
+        if (mIsBoldParkedText) {
+            hint = Html.fromHtml(String.format("<font color=\"#%s\"><b>%s</b></font><font " +
+                    "color=\"#%s\">%s</font>", parkedTextColor, mParkedText, parkedHintColor,
+                    placeholderText));
+        } else {
+            hint = Html.fromHtml(String.format("<font color=\"#%s\">%s</font><font " +
+                    "color=\"#%s\">%s</font>", parkedTextColor, mParkedText, parkedHintColor,
+                    placeholderText));
+        }
+        super.setHint(hint);
+    }
+
+    // Call when TypedText is changed
+    private String observeText() {
+        return mTotalText = mParkedText + getTypedText();
+    }
+
     public String getParkedText() {
         return mParkedText;
     }
 
     public void setParkedText(String parkedText) {
+
+        parkedText = Html.fromHtml (parkedText).toString ();
+
         if (!TextUtils.isEmpty(mTotalText)) {
-            String typed = mTotalText.substring(0, getBeginningPositionOfParkedText());
-            mTotalText = typed + parkedText;
+            String typed = mTotalText.substring(parkedText.length ());
+            mTotalText = parkedText + typed;
             mParkedText = parkedText;
 
             textChanged(mTotalText);
@@ -93,45 +120,19 @@ public class ParkedTextView extends EditText {
         }
     }
 
-    private int getBeginningPositionOfParkedText() {
-        int position = mTotalText.length() - mParkedText.length();
-        Log.w (TAG, "text = " + mTotalText + " parked = " + mParkedText);
-        if (position < 0) {
-            return 0;
-        }
-        return position;
-    }
-
-    private void goToBeginningOfParkedText() {
-        setSelection(getBeginningPositionOfParkedText());
-    }
-
     private String getTypedText() {
-        if ( mTotalText.endsWith(mParkedText)) {
-            return mTotalText.substring(0, getBeginningPositionOfParkedText());
+        if ( mTotalText.startsWith (mParkedText)) {
+            return mTotalText.substring(mParkedText.length ());
         }
         return mTotalText;
     }
 
+    private void goToEndOfText() {
+            setSelection (getText ().length ());
+    }
+
     private void setTypedText(String typedText) {
         textChanged(typedText);
-    }
-
-    public void setPlaceholderText(String placeholderText) {
-        Spanned hint;
-        String parkedTextColor = reformatColor(mParkedTextColor);
-        String parkedHintColor = reformatColor(mParkedHintColor);
-        if (mIsBoldParkedText) {
-            hint = Html.fromHtml(String.format("<font color=\"#%s\">%s</font><font color=\"#%s\"><b>%s</b></font>", parkedHintColor, placeholderText, parkedTextColor, mParkedText));
-        } else {
-            hint = Html.fromHtml(String.format("<font color=\"#%s\">%s</font><font color=\"#%s\">%s</font>", parkedHintColor, placeholderText, parkedTextColor, mParkedText));
-        }
-        super.setHint(hint);
-    }
-
-    // Call when TypedText is changed
-    private String observeText() {
-        return mTotalText = getTypedText() + mParkedText;
     }
 
     private String reformatColor(String color) {
@@ -147,22 +148,35 @@ public class ParkedTextView extends EditText {
 
     private Spanned getHtmlText() {
         String parkedTextColor = reformatColor(mParkedTextColor);
-        Log.w (TAG, "parked text = " + mParkedText + " typed = " + getTypedText ());
+
         if (mIsBoldParkedText) {
-            return Html.fromHtml(String.format("<font color=\"#%s\">%s</font><font color=\"#%s\"><b>%s</b></font>", parkedTextColor, getTypedText(), parkedTextColor, mParkedText));
+            return Html.fromHtml(String.format("<font color=\"#%s\"><b>%s</b></font><font " +
+                    "color=\"#%s\">%s</font>", parkedTextColor, mParkedText, parkedTextColor,
+                    getTypedText()));
         }
-        return Html.fromHtml(String.format("<font color=\"#%s\">%s</font>", parkedTextColor, getTypedText() + mParkedText));
+        return Html.fromHtml(String.format("<font color=\"#%s\">%s</font>", parkedTextColor,
+                mParkedText + getTypedText()));
     }
 
     private void textChanged (String typedText) {
-        if (!typedText.endsWith (mParkedText)) {
-            mTotalText = getTypedText () + mParkedText;
-            setText (getHtmlText ());
-        } else {
+
+        if ( typedText.startsWith (mParkedText) ) {
+
             mTotalText = typedText;
+
+        } else if ( getText ().length () <= 1 ) {
+
+            mTotalText = mParkedText + typedText;
             setText (getHtmlText ());
+
+        } else {
+
+            mTotalText = mParkedText + getTypedText();
+            setText (getHtmlText ());
+
         }
-        goToBeginningOfParkedText();
+
+        goToEndOfText ();
     }
 
     public boolean isBoldParkedText() {
