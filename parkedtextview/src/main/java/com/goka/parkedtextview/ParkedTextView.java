@@ -81,7 +81,7 @@ public class ParkedTextView extends EditText {
             mTotalText = parkedText + typed;
             mParkedText = parkedText;
 
-            textChanged(mTotalText);
+            setText (mTotalText);
         } else {
             mParkedText = parkedText;
             mTotalText = parkedText;
